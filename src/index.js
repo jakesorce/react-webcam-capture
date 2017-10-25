@@ -39,6 +39,8 @@ class ReactWebCamCapture extends Component {
   mediaChunk = []
 
   componentDidMount() {
+    let width = this.props.width
+    let height = this.props.height
     let constraints = this.props.constraints
 
     const handleSuccess = (stream) => {
@@ -54,6 +56,7 @@ class ReactWebCamCapture extends Component {
 
       this.initMediaRecorder()
     }
+
     const handleFailed = (err) => {
       this.setState({ asked: false })
       this.props.onDenied(err)
@@ -168,6 +171,11 @@ class ReactWebCamCapture extends Component {
   }
 
   render() {
+    const asked = this.state.asked
+    const permission = this.state.permission
+    const recording = this.state.recording
+    const available = this.state.available
+
     return (
       <div className={this.props.className}>
         {this.props.render({
