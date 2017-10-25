@@ -189,21 +189,6 @@ class ReactWebCamCapture extends Component {
   }
 }
 
-ReactWebCamCapture.propTypes = {
-  constraints: React.PropTypes.object,
-  className: React.PropTypes.string,
-  timeSlice: React.PropTypes.number,
-  mimeType: React.PropTypes.string,
-  render: React.PropTypes.func,
-  onGranted: React.PropTypes.func,
-  onDenied: React.PropTypes.func,
-  onStart: React.PropTypes.func,
-  onStop: React.PropTypes.func,
-  onPause: React.PropTypes.func,
-  onResume: React.PropTypes.func,
-  onError: React.PropTypes.func
-}
-
 ReactWebCamCapture.defaultProps = {
   constraints: {
     audio: true,
