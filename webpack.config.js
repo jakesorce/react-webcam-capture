@@ -16,7 +16,7 @@ module.exports = {
   }],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'index.js',
+    filename: 'webcam-capture.js',
     libraryTarget: 'umd'
   },
   module: {
