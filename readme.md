@@ -21,7 +21,7 @@ class VideoExample extends Component {
   ...
   render() {
     return (
-      <div>
+      <div ref='app'>
         ...
         <h1>Video Recording Example</h1>
         <hr />
