@@ -1,6 +1,6 @@
 {
   "name": "react-webcam-capture",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "react-webcam-capture is Multimedia capturing module via React, using HTML5 MediaDevice and MediaRecorder API",
   "main": "dist/index.js",
   "engines": {
