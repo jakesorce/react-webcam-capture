@@ -2,6 +2,10 @@
 react-webcam-capture is module for capturing multimedia from WebBrowser via React.
 It uses navigator.mediaDevices.getUserMedia and MediaRecorder API, so make sure that your browser supports.
 
+
+## Install
+`yarn add react-webcam-capture`
+
 ## Features
 - Uses supporting getUserMedia API from mediaDevices.getUserMedia/getUserMedia/-vendor_prefix-GetUserMedia.
 - Easy, intuitive interface
