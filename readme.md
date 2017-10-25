@@ -13,9 +13,6 @@ It uses navigator.mediaDevices.getUserMedia and MediaRecorder API, so make sure 
 
 ### VideoRecorder Example
 
-Example can found from here: [react-multimedia-capture-example](https://github.com/rico345100/react-multimedia-capture-example).
-Example demonstrates all features in react-multimedia-capture.
-
 ```javascript
 
 import MediaCapturer from 'react-multimedia-capture';
@@ -38,8 +35,8 @@ class VideoExample extends Component {
 					onStop={this.handleStop}
 					onPause={this.handlePause}
 					onResume={this.handleResume}
-					onError={this.handleError} 
-					render={({ start, stop, pause, resume }) => 
+					onError={this.handleError}
+					render={({ start, stop, pause, resume }) =>
 					<div>
 						<p>Granted: {granted.toString()}</p>
 						<p>Rejected Reason: {rejectedReason}</p>
@@ -50,7 +47,7 @@ class VideoExample extends Component {
 						<button onClick={stop}>Stop</button>
 						<button onClick={pause}>Pause</button>
 						<button onClick={resume}>Resume</button>
-						
+
 						<p>Streaming test</p>
 						<video autoPlay></video>
 					</div>
@@ -99,8 +96,3 @@ Handler that fires on error occurs. This also could be fired if the browser not 
 
 ### Function render({ start, stop, pause, resume })
 Render the child components with functions. Each function actually manipulate recording related jobs into parent like VideoRecorder or AudioRecorder.
-
-
-## Updates
-### 1.0.2
-- Added stop recording on unmounting component

@@ -1,229 +1,217 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
 if(location.protocol !== 'https:' && location.hostname !== 'localhost') {
-	console.warn('getUserMedia() must be run from a secure origin: https or localhost.\nChanging protocol to https.');
-}
-if(!navigator.mediaDevices && !navigator.getUserMedia) {
-	console.warn(`Your browser doesn't support navigator.mediaDevices.getUserMedia and navigator.getUserMedia.`);
+  console.warn('getUserMedia() must be run from a secure origin: https or localhost.\nChanging protocol to https.')
 }
 
-navigator.getUserMedia = navigator.getUserMedia ||
-						 navigator.webkitGetUserMedia ||
-						 navigator.mozGetUserMedia ||
-						 navigator.msGetUserMedia;
+if(!navigator.mediaDevices && !navigator.getUserMedia) {
+  console.warn(`Your browser doesn't support navigator.mediaDevices.getUserMedia and navigator.getUserMedia.`)
+}
+
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia
 
 // stop hack
 // from http://stackoverflow.com/questions/11642926/stop-close-webcam-which-is-opened-by-navigator-getusermedia
-var MediaStream = window.MediaStream || window.webkitMediaStream;;
-if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
-    MediaStream.prototype.stop = function() {
-        this.getAudioTracks().forEach(function(track) {
-            track.stop();
-        });
+var MediaStream = window.MediaStream || window.webkitMediaStream
+if(typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
+  MediaStream.prototype.stop = () => {
+    this.getAudioTracks().forEach((track) => {
+      track.stop()
+    })
 
-        this.getVideoTracks().forEach(function(track) {
-            track.stop();
-        });
-    };
+    this.getVideoTracks().forEach((track) => {
+      track.stop()
+    })
+  }
 }
 
-class ReactMediaRecorder extends Component {
-	constructor(props) {
-		super(props);
+class ReactWebCamCapture extends Component {
+  state = {
+    asked: false,
+    permission: false,
+    available: false,
+    recording: false,
+    paused: false
+  }
 
-		this.state = {
-			asked: false,
-			permission: false,
-			available: false,
-			recording: false,
-			paused: false
-		};
+  stream = null
+  mediaRecorder = null
+  mediaChunk = []
 
-		this.stream = null;
-		this.mediaRecorder = null;
-		this.mediaChunk = [];
+  componentDidMount() {
+    let constraints = this.props.constraints
 
-		this.start = this.start.bind(this);
-		this.stop = this.stop.bind(this);
-		this.pause = this.pause.bind(this);
-		this.resume = this.resume.bind(this);
-		this.initMediaRecorder = this.initMediaRecorder.bind(this);
-	}
-	componentDidMount() {
-		let width = this.props.width;
-		let height = this.props.height;
-		let constraints = this.props.constraints;
+    const handleSuccess = (stream) => {
+      this.stream = stream
+      this.mediaChunk = []
 
-		const handleSuccess = (stream) => {
-			this.stream = stream;
-			this.mediaChunk = [];
+      this.setState({
+        permission: true,
+        asked: true,
+        recording: false
+      })
+      this.props.onGranted()
 
-			this.setState({ 
-				permission: true, 
-				asked: true, 
-				recording: false,
-			});
-			this.props.onGranted();
+      this.initMediaRecorder()
+    }
+    const handleFailed = (err) => {
+      this.setState({ asked: false })
+      this.props.onDenied(err)
+    }
 
-			this.initMediaRecorder();
-		};
-		const handleFailed = (err) => {
-			this.setState({ asked: false });
-			this.props.onDenied(err);
-		};
+    if(navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(handleSuccess)
+        .catch(handleFailed)
+    } else if(navigator.getUserMedia) {
+      navigator.getUserMedia(constraints, handleSuccess, handleFailed)
+    } else {
+      let errMessage = `Browser doesn't support UserMedia API. Please try with another browser.`
+      console.warn(errMessage)
 
-		if(navigator.mediaDevices) {
-			navigator.mediaDevices.getUserMedia(constraints)
-			.then(handleSuccess)
-			.catch(handleFailed);
-		}
-		else if(navigator.getUserMedia) {
-			navigator.getUserMedia(constraints, handleSuccess, handleFailed);
-		}
-		else {
-			let errMessage = `Browser doesn't support UserMedia API. Please try with another browser.`;
-			console.warn(errMessage);
+      this.props.onError(new Error(errMessage))
+    }
+  }
 
-			this.props.onError(new Error(errMessage));
-		}
-	}
-	componentWillUnmount() {
-		this.mediaRecorder = null;
-		this.mediaChunk = [];
+  componentWillUnmount() {
+    this.mediaRecorder = null
+    this.mediaChunk = []
 
-		this.stream.stop();
-		this.stream = null;
-	}
-	initMediaRecorder() {
-		try {
-			let options = {};
-			let types = ['video/webm;codecs=vp8', 'video/webm', ''];
+    this.stream.stop()
+    this.stream = null
+  }
 
-			if(this.props.mimeType) types.unshift(this.props.mimeType);
+  initMediaRecorder = () => {
+    try {
+      let options = {}
+      let types = ['video/webmcodecs=vp8', 'video/webm', '']
 
-			for(let i = 0; i < types.length; i++) {
-				let type = types[i];
+      if(this.props.mimeType) types.unshift(this.props.mimeType)
 
-				if(MediaRecorder.isTypeSupported(type)) {
-					options.mimeType = type;
-					break;
-				}
+      for(let i = 0; i < types.length; i++) {
+        let type = types[i]
 
-				console.warn(`${type} is not supported on your browser.`);
-			}
+        if(MediaRecorder.isTypeSupported(type)) {
+          options.mimeType = type
+          break
+        }
 
-			let mediaRecorder = new MediaRecorder(this.stream, options);
+        console.warn(`${type} is not supported on your browser.`)
+      }
 
-			mediaRecorder.ondataavailable = (ev) => {
-				if(ev.data && ev.data.size > 0) {
-					this.mediaChunk.push(event.data);
-				}
-			};
+      let mediaRecorder = new MediaRecorder(this.stream, options)
 
-			this.mediaRecorder = mediaRecorder;
+      mediaRecorder.ondataavailable = (ev) => {
+        if(ev.data && ev.data.size > 0) {
+          this.mediaChunk.push(event.data)
+        }
+      }
 
-			this.setState({
-				available: true
-			});
-		}
-		catch(err) {
-			console.log(err);
-			console.error('Failed to initialize MediaRecorder.', err);
+      this.mediaRecorder = mediaRecorder
 
-			this.setState({
-				available: false
-			});
-		}
-	}
-	start() {
-		if(!this.state.available) return;
+      this.setState({
+        available: true
+      })
+    } catch(err) {
+      console.log(err)
+      console.error('Failed to initialize MediaRecorder.', err)
 
-		this.mediaChunk = [];
-		this.mediaRecorder.start(this.props.timeSlice);
+      this.setState({
+        available: false
+      })
+    }
+  }
 
-		this.setState({
-			recording: true
-		});
+  start = () => {
+    if(!this.state.available) return
 
-		this.props.onStart(this.stream);
-	}
-	pause() {
-		if(!this.state.recording) return;
-		this.mediaRecorder.stop();
+    this.mediaChunk = []
+    this.mediaRecorder.start(this.props.timeSlice)
 
-		this.setState({ paused: true });
+    this.setState({
+      recording: true
+    })
 
-		this.props.onPause();
-	}
-	resume() {
-		if(!this.state.recording) return;
-		this.initMediaRecorder();
-		this.mediaRecorder.start(this.props.timeSlice);
+    this.props.onStart(this.stream)
+  }
 
-		this.setState({ paused: false });
+  pause = () => {
+    if(!this.state.recording) return
+    this.mediaRecorder.stop()
 
-		this.props.onResume(this.stream);
-	}
-	stop() {
-		if(!this.state.available) return;
-		
-		this.mediaRecorder.stop();
+    this.setState({ paused: true })
 
-		this.setState({
-			recording: false
-		});
+    this.props.onPause()
+  }
 
-		let blob = new Blob(this.mediaChunk, { type: 'video/webm' });
-		this.props.onStop(blob);
-	}
-	render() {
-		const asked = this.state.asked;
-		const permission = this.state.permission;
-		const recording = this.state.recording;
-		const available = this.state.available;
+  resume = () => {
+    if(!this.state.recording) return
+    this.initMediaRecorder()
+    this.mediaRecorder.start(this.props.timeSlice)
 
-		return (
-			<div className={this.props.className}>
-				{this.props.render({
-					start: this.start,
-					stop: this.stop,
-					pause: this.pause,
-					resume: this.resume
-				})}
-			</div>
-		);
-	}
+    this.setState({ paused: false })
+
+    this.props.onResume(this.stream)
+  }
+
+  stop = () => {
+    if(!this.state.available) return
+
+    this.mediaRecorder.stop()
+
+    this.setState({
+      recording: false
+    })
+
+    let blob = new Blob(this.mediaChunk, { type: 'video/webm' })
+    this.props.onStop(blob)
+  }
+
+  render() {
+    return (
+      <div className={this.props.className}>
+        {this.props.render({
+          start: this.start,
+          stop: this.stop,
+          pause: this.pause,
+          resume: this.resume
+        })}
+      </div>
+    )
+  }
 }
-ReactMediaRecorder.propTypes = {
-	constraints: React.PropTypes.object,
-	className: React.PropTypes.string,
-	timeSlice: React.PropTypes.number,
-	mimeType: React.PropTypes.string,
-	render: React.PropTypes.func,
-	onGranted: React.PropTypes.func,
-	onDenied: React.PropTypes.func,
-	onStart: React.PropTypes.func,
-	onStop: React.PropTypes.func,
-	onPause: React.PropTypes.func,
-	onResume: React.PropTypes.func,
-	onError: React.PropTypes.func
-};
-ReactMediaRecorder.defaultProps = {
-	constraints: {
-		audio: true,
-		video: true
-	},
-	className: '',
-	timeSlice: 0,
-	mimeType: '',
-	render: function() {},
-	onGranted: function(){},
-	onDenied: function(){},
-	onStart: function(){},
-	onStop: function(){},
-	onPause: function(){},
-	onResume: function(){},
-	onError: function(){}
-};
 
-export default ReactMediaRecorder;
+ReactWebCamCapture.propTypes = {
+  constraints: React.PropTypes.object,
+  className: React.PropTypes.string,
+  timeSlice: React.PropTypes.number,
+  mimeType: React.PropTypes.string,
+  render: React.PropTypes.func,
+  onGranted: React.PropTypes.func,
+  onDenied: React.PropTypes.func,
+  onStart: React.PropTypes.func,
+  onStop: React.PropTypes.func,
+  onPause: React.PropTypes.func,
+  onResume: React.PropTypes.func,
+  onError: React.PropTypes.func
+}
+
+ReactWebCamCapture.defaultProps = {
+  constraints: {
+    audio: true,
+    video: true
+  },
+  className: '',
+  timeSlice: 0,
+  mimeType: '',
+  render: function() {},
+  onGranted: function() {},
+  onDenied: function() {},
+  onStart: function() {},
+  onStop: function() {},
+  onPause: function() {},
+  onResume: function() {},
+  onError: function() {}
+}
+
+export default ReactWebCamCapture

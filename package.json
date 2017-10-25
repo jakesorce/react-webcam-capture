@@ -1,14 +1,22 @@
 {
-  "name": "react-multimedia-capture",
-  "version": "1.0.2",
-  "description": "react-multimedia-capture is Multimedia capturing module via React, using HTML5 MediaDevice and MediaRecorder API",
+  "name": "react-webcam-capture",
+  "version": "1.0.1",
+  "description": "react-webcam-capture is Multimedia capturing module via React, using HTML5 MediaDevice and MediaRecorder API",
   "main": "dist/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "engines": {
+    "node": ">=6.9.4"
   },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run lint && webpack"
+  },
+  "pre-commit": [
+    "lint"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/rico345100/react-multimedia-capture"
+    "url": "https://github.com/jakesorce/react-webcam-capture"
   },
   "keywords": [
     ".modernator",
@@ -20,18 +28,36 @@
     "video",
     "audio"
   ],
-  "author": ".modernator",
+  "author": "Jake Sorce <jakesorce@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/jakesorce/react-webcam-capture/issues"
+  },
   "license": "MIT",
-  "dependencies": {},
+  "homepage": "https://github.com/jakesorce/react-webcam-capture/issues#readme",
+  "dependencies": {
+    "prop-types": "^15.5.10",
+    "react": "^16.0.0",
+    "whatwg-fetch": "^2.0.3"
+  },
   "devDependencies": {
-    "babel-core": "^6.21.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-preset-react": "^6.16.0",
-    "babelify": "^7.3.0",
-    "browserify": "^13.3.0",
-    "gulp": "^3.9.1",
-    "gulp-util": "^3.0.8",
-    "uglify": "^0.1.5",
-    "vinyl-source-stream": "^1.1.0"
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.22.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "eslint": "^4.5.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-config-standard-jsx": "^4.0.2",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-react": "^7.2.1",
+    "eslint-plugin-standard": "^3.0.1",
+    "html-webpack-plugin": "^2.30.1",
+    "pre-commit": "^1.2.2",
+    "react-dom": "^16.0.0",
+    "webpack": "^3.5.5",
+    "webpack-dev-server": "^2.6.1"
   }
 }
