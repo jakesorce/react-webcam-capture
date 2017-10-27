@@ -39,47 +39,7 @@ class ReactWebCamCapture extends Component {
   mediaChunk = []
 
   componentDidMount() {
-    let constraints = this.props.constraints
-
-    const handleSuccess = (stream) => {
-      if(this.props.autoPlay) {
-        navigator.getUserMedia(
-          this.props.constraints,
-          this.props.setStreamToVideo,
-          this.props.handleError
-        )
-      }
-      this.stream = stream
-      this.mediaChunk = []
-
-      this.setState({
-        permission: true,
-        asked: true,
-        recording: false
-      })
-
-      this.props.onGranted()
-
-      this.initMediaRecorder()
-    }
-
-    const handleFailed = (err) => {
-      this.setState({ asked: false })
-      this.props.onDenied(err)
-    }
-
-    if(navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then(handleSuccess)
-        .catch(handleFailed)
-    } else if(navigator.getUserMedia) {
-      navigator.getUserMedia(constraints, handleSuccess, handleFailed)
-    } else {
-      let errMessage = `Browser doesn't support UserMedia API. Please try with another browser.`
-      console.warn(errMessage)
-
-      this.props.onError(new Error(errMessage))
-    }
+    this.getUserMedia()
   }
 
   componentWillUnmount() {
@@ -88,6 +48,46 @@ class ReactWebCamCapture extends Component {
 
     this.stream.stop()
     this.stream = null
+  }
+
+  handleSuccess = (stream) => {
+    if(this.props.autoPlay) {
+      this.props.setStreamToVideo(stream)
+    }
+    this.stream = stream
+    this.mediaChunk = []
+
+    this.setState({
+      permission: true,
+      asked: true,
+      recording: false
+    })
+
+    this.props.onGranted()
+
+    this.initMediaRecorder()
+  }
+
+  handleFailed = (err) => {
+    this.setState({ asked: false })
+    this.props.onDenied(err)
+  }
+
+  getUserMedia = () => {
+    const { constraints } = this.props
+
+    if(navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(this.handleSuccess)
+        .catch(this.handleFailed)
+    } else if(navigator.getUserMedia) {
+      navigator.getUserMedia(constraints, this.handleSuccess, this.handleFailed)
+    } else {
+      let errMessage = `Browser doesn't support UserMedia API. Please try with another browser.`
+      console.warn(errMessage)
+
+      this.props.onError(new Error(errMessage))
+    }
   }
 
   initMediaRecorder = () => {
@@ -200,7 +200,6 @@ ReactWebCamCapture.defaultProps = {
   timeSlice: 0,
   mimeType: '',
   setStreamToVideo: function() {},
-  handleError: function() {},
   render: function() {},
   onGranted: function() {},
   onDenied: function() {},
