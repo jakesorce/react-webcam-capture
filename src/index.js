@@ -39,11 +39,16 @@ class ReactWebCamCapture extends Component {
   mediaChunk = []
 
   componentDidMount() {
-    let width = this.props.width
-    let height = this.props.height
     let constraints = this.props.constraints
 
     const handleSuccess = (stream) => {
+      if(this.props.autoPlay) {
+        navigator.getUserMedia(
+          this.props.constraints,
+          this.props.setStreamToVideo(stream),
+          this.props.handleError
+        )
+      }
       this.stream = stream
       this.mediaChunk = []
 
@@ -52,6 +57,7 @@ class ReactWebCamCapture extends Component {
         asked: true,
         recording: false
       })
+
       this.props.onGranted()
 
       this.initMediaRecorder()
@@ -171,11 +177,6 @@ class ReactWebCamCapture extends Component {
   }
 
   render() {
-    const asked = this.state.asked
-    const permission = this.state.permission
-    const recording = this.state.recording
-    const available = this.state.available
-
     return (
       <div className={this.props.className}>
         {this.props.render({
@@ -194,9 +195,12 @@ ReactWebCamCapture.defaultProps = {
     audio: true,
     video: true
   },
+  autoPlay: true,
   className: '',
   timeSlice: 0,
   mimeType: '',
+  setStreamToVideo: function() {},
+  handleError: function() {},
   render: function() {},
   onGranted: function() {},
   onDenied: function() {},
