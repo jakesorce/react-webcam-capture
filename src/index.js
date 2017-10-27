@@ -45,7 +45,7 @@ class ReactWebCamCapture extends Component {
       if(this.props.autoPlay) {
         navigator.getUserMedia(
           this.props.constraints,
-          this.props.setStreamToVideo(stream),
+          this.props.setStreamToVideo,
           this.props.handleError
         )
       }
