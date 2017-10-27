@@ -174,6 +174,7 @@ class ReactWebCamCapture extends Component {
 
     let blob = new Blob(this.mediaChunk, { type: 'video/webm' })
     this.props.onStop(blob)
+    this.getUserMedia()
   }
 
   render() {
