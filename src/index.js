@@ -93,7 +93,11 @@ class ReactWebCamCapture extends Component {
   initMediaRecorder = () => {
     try {
       let options = {}
-      let types = ['video/webmcodecs=vp8', 'video/webm', '']
+      let types = [
+        'video/webm;codecs=vp8',
+        'video/webm', 
+        ''
+      ]
 
       if(this.props.mimeType) types.unshift(this.props.mimeType)
 
